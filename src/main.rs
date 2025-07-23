@@ -1,6 +1,6 @@
 use noisy_float::prelude::*;
 use rand::prelude::*;
-use rand_distr::{Exp, Distribution};
+use rand_distr::{Distribution, Exp};
 
 use std::f64::INFINITY;
 const EPSILON: f64 = 1e-8;
@@ -24,16 +24,14 @@ impl Dist {
                 };
                 Exp::new(*mu).unwrap().sample(rng)
             }
-            Dist::Uniform(low, high) => {
-                rng.random_range(*low..*high)
-            }
+            Dist::Uniform(low, high) => rng.random_range(*low..*high),
         }
     }
     fn mean(&self) -> f64 {
         use Dist::*;
         match self {
             Hyperexp(low_mu, high_mu, prob_low) => prob_low / low_mu + (1.0 - prob_low) / high_mu,
-            Uniform(low, high) => (low + high) / 2.0
+            Uniform(low, high) => (low + high) / 2.0,
         }
     }
 }
@@ -162,9 +160,14 @@ fn simulate(
 }
 
 fn main() {
-    let dists = vec![Dist::Hyperexp(1.9, 0.1, 0.95), Dist::Uniform(0.0, 2.0)];
+    let dists = vec![
+        Dist::Hyperexp(1.0, 1.0, 1.0),
+        Dist::Hyperexp(1.9, 0.1, 0.95),
+        Dist::Uniform(0.0, 2.0),
+    ];
     for dist in dists {
         //let dist = Dist::Hyperexp(1.0, 1.0, 1.0);
+        /*
         let rhos = vec![
             0.01, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7,
             0.72, 0.74, 0.76, 0.78, 0.8, 0.82, 0.84, 0.86, 0.88, 0.9, 0.903, 0.906, 0.91, 0.913,
@@ -172,9 +175,15 @@ fn main() {
             0.956, 0.958, 0.96, 0.962, 0.964, 0.966, 0.968, 0.97, 0.972, 0.974, 0.976, 0.978, 0.98,
             0.983, 0.986, 0.99, 0.993, 0.996,
         ];
-        //let rhos = vec![0.1, 0.5, 0.8];
+        */
+        let rhos = vec![
+            0.75, 0.76, 0.78, 0.8, 0.82, 0.84, 0.86, 0.88, 0.9, 0.903, 0.906, 0.91, 0.913, 0.916,
+            0.92, 0.923, 0.926, 0.93, 0.933, 0.936, 0.94, 0.943, 0.946, 0.95, 0.952, 0.954, 0.956,
+            0.958, 0.96, 0.962, 0.964, 0.966, 0.968, 0.97, 0.972, 0.974, 0.976, 0.978, 0.98, 0.983,
+            0.986, 0.99, 0.993, 0.996,
+        ];
         let seed = 0;
-        let num_jobs = 10_000_000;
+        let num_jobs = 100_000_000;
         let num_servers = 2;
         println!(
             "num_jobs {} num_servers {} seed {} dist {:?}",
@@ -182,14 +191,27 @@ fn main() {
         );
         let policies = vec![
             Policy::SRPT,
+            /*
             Policy::SRPTExcept(0.1),
             Policy::SRPTExcept(0.2),
+            */
             Policy::SRPTExcept(0.5),
             Policy::SRPTExcept(1.0),
             Policy::SRPTExcept(1.5),
+            /*
             Policy::PSJF,
             Policy::RS,
+            */
         ];
+        /*
+        let policies = vec![
+            Policy::SRPTExcept(2.0),
+            Policy::SRPTExcept(2.5),
+            Policy::SRPTExcept(3.0),
+            Policy::SRPTExcept(3.5),
+            Policy::SRPTExcept(4.0),
+        ];
+        */
         print!("rho");
         for policy in &policies {
             print!(";{:?}", policy);
